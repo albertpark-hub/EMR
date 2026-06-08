@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>thynC EMR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.14.0/dist/tabler-icons.min.css">
+<style>
+/* API 서버 주소 변경: window.API_BASE = 'http://your-server:4000' */
+
+:root {
+  --bg: #F5F4F0;
+  --surface: #FFFFFF;
+  --surface2: #EFEDE8;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #18181A;
+  --text2: #5C5C60;
+  --text3: #9A9A9E;
+  --accent: #1A56DB;
+  --accent-bg: #EEF2FF;
+  --accent-text: #1E40AF;
+  --red: #DC2626; --red-bg: #FEF2F2; --red-text: #991B1B;
+  --amber: #D97706; --amber-bg: #FFFBEB; --amber-text: #92400E;
+  --green: #16A34A; --green-bg: #F0FDF4; --green-text: #166534;
+  --purple: #7C3AED; --purple-bg: #F5F3FF; --purple-text: #5B21B6;
+  --teal: #0D9488; --teal-bg: #F0FDFA; --teal-text: #134E4A;
+  --r: 10px; --r-sm: 6px; --r-lg: 14px;
+  --sh: 0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --sh-md: 0 4px 20px rgba(0,0,0,0.10),0 2px 6px rgba(0,0,0,0.06);
+  --sh-lg: 0 16px 48px rgba(0,0,0,0.16),0 4px 12px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+
+/* ===== AUTH SCREEN ===== */
+#authScreen{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);width:380px;padding:40px;box-shadow:var(--sh-md)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.auth-logo-icon{width:38px;height:38px;background:var(--text);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.auth-logo-icon i{color:#fff;font-size:20px}
+.auth-logo h1{font-size:18px;font-weight:700;letter-spacing:-0.03em}
+.auth-card h2{font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-0.02em}
+.auth-card p{font-size:13px;color:var(--text2);margin-bottom:24px}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.auth-field input{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;color:var(--text);background:var(--bg);font-family:inherit;outline:none;transition:border-color .15s,background .15s}
+.auth-field input:focus{border-color:var(--accent);background:#fff}
+.auth-error{background:var(--red-bg);color:var(--red-text);font-size:12px;padding:8px 12px;border-radius:var(--r-sm);margin-bottom:14px;display:none;border:1px solid #FCA5A5}
+.auth-btn{width:100%;padding:11px;background:var(--text);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-0.01em;transition:background .15s}
+.auth-btn:hover{background:#333}
+.auth-hint{margin-top:16px;font-size:12px;color:var(--text3);text-align:center;line-height:1.6}
+.auth-hint code{background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:11px;color:var(--text2)}
+
+/* ===== APP SHELL ===== */
+#appShell{display:none;flex-direction:column;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:12px}
+.topbar-brand{display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo-icon{width:28px;height:28px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-icon i{color:#fff;font-size:15px}
+.topbar-brand h1{font-size:14px;font-weight:700;letter-spacing:-0.02em}
+.topbar-center{display:flex;gap:2px}
+.nav-tab{font-size:13px;padding:6px 12px;border:none;background:transparent;color:var(--text2);cursor:pointer;border-radius:var(--r-sm);font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px}
+.nav-tab:hover{background:var(--surface2);color:var(--text)}
+.nav-tab.active{background:var(--surface2);color:var(--text);font-weight:600}
+.nav-tab .badge{font-size:10px;background:var(--red);color:#fff;padding:1px 5px;border-radius:100px;font-weight:700}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.search-wrap{position:relative}
+.search-wrap input{padding:7px 10px 7px 30px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--bg);font-size:13px;color:var(--text);width:190px;outline:none;font-family:inherit}
+.search-wrap input:focus{border-color:var(--accent);background:#fff}
+.search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.btn{font-size:13px;padding:7px 12px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;font-weight:500;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn-danger{color:var(--red);border-color:#FCA5A5}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-sm{font-size:12px;padding:5px 10px}
+.notif-wrap{position:relative}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;width:15px;height:15px;border-radius:50%;display:none;align-items:center;justify-content:center;border:2px solid var(--surface)}
+.user-chip{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 6px;border:1px solid var(--border2);border-radius:100px;cursor:pointer;transition:all .15s}
+.user-chip:hover{background:var(--surface2)}
+.avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.user-chip span{font-size:12px;font-weight:600}
+.role-badge{font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600}
+.role-admin{background:var(--red-bg);color:var(--red-text)}
+.role-manager{background:var(--purple-bg);color:var(--purple-text)}
+.role-hospital{background:var(--teal-bg);color:var(--teal-text)}
+.role-member{background:var(--accent-bg);color:var(--accent-text)}
+
+/* ===== PAGES ===== */
+.page{display:none}
+.page.active{display:block}
+
+/* ALERTS */
+.alert-section{padding:14px 24px 0}
+.alert-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.alert-panel-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;background:var(--surface2)}
+.alert-panel-head span{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.alert-item:last-child{border-bottom:none}
+.alert-ico{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.alert-ico.overdue{background:var(--red-bg);color:var(--red)}
+.alert-ico.today{background:var(--amber-bg);color:var(--amber)}
+.alert-ico.soon{background:var(--accent-bg);color:var(--accent)}
+.alert-ico.stage{background:var(--purple-bg);color:var(--purple)}
+.alert-title{font-size:13px;font-weight:600;margin-bottom:1px}
+.alert-sub{font-size:12px;color:var(--text2)}
+.alert-dismiss{margin-left:auto;cursor:pointer;color:var(--text3);padding:3px;border-radius:4px;flex-shrink:0}
+.alert-dismiss:hover{color:var(--text2);background:var(--surface2)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.stat-label{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.stat-val{font-size:22px;font-weight:700;letter-spacing:-0.03em}
+.stat-val.danger{color:var(--red)}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;padding:0 24px 12px;align-items:center;flex-wrap:wrap}
+.filters label{font-size:11px;color:var(--text3);font-weight:600}
+.filters select{font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--surface);color:var(--text);cursor:pointer;outline:none;font-family:inherit}
+.filters select:focus{border-color:var(--accent)}
+
+/* BOARD */
+.board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:0 24px 24px}
+.col{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-height:280px}
+.col-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.col-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px}
+.col-dot{width:7px;height:7px;border-radius:50%}
+.col-cnt{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:700}
+.col-body{padding:8px;display:flex;flex-direction:column;gap:7px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:all .15s;box-shadow:var(--sh)}
+.card:hover{border-color:var(--border2);box-shadow:var(--sh-md);transform:translateY(-1px)}
+.card.overdue{border-color:#FCA5A5}
+.card.due-today{border-color:#FCD34D}
+.card-name{font-size:13px;font-weight:700;margin-bottom:2px;letter-spacing:-0.01em}
+.card-meta{font-size:11px;color:var(--text2);margin-bottom:5px}
+
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:7px;flex-wrap:wrap;gap:4px}
+.tag{font-size:10px;padding:2px 6px;border-radius:100px;font-weight:600}
+
+
+
+
+
+.dl-badge{font-size:10px;padding:2px 6px;border-radius:100px;font-weight:600;display:flex;align-items:center;gap:3px}
+.dl-badge.overdue{background:var(--red-bg);color:var(--red-text)}
+.dl-badge.today{background:var(--amber-bg);color:var(--amber-text)}
+.dl-badge.soon{background:var(--accent-bg);color:var(--accent-text)}
+.dl-badge.normal{background:var(--surface2);color:var(--text2)}
+.add-col-btn{font-size:12px;color:var(--text3);background:transparent;border:1px dashed var(--border2);border-radius:var(--r-sm);padding:6px;width:100%;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;font-family:inherit;margin-top:2px}
+.add-col-btn:hover{background:var(--surface);color:var(--text2);border-style:solid}
+
+/* ===== ADMIN PAGE ===== */
+.admin-layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 54px)}
+.admin-sidebar{background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:2px}
+.admin-nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
+.admin-nav-item:hover{background:var(--surface2);color:var(--text)}
+.admin-nav-item.active{background:var(--accent-bg);color:var(--accent-text);font-weight:600}
+.admin-nav-item i{font-size:16px}
+.admin-content{padding:24px;overflow-y:auto}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-head h2{font-size:16px;font-weight:700;letter-spacing:-0.02em}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);border:1px solid var(--border)}
+.data-table th{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);text-align:left}
+.data-table td{font-size:13px;padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg)}
+
+/* STAGE SETTINGS */
+.stage-list{display:flex;flex-direction:column;gap:8px}
+.stage-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
+.stage-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.stage-row-name{font-size:13px;font-weight:600;flex:1}
+.stage-order-btns{display:flex;gap:4px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);width:500px;box-shadow:var(--sh-lg);animation:mUp .2s ease}
+@keyframes mUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-head h2{font-size:15px;font-weight:700;letter-spacing:-0.02em}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;max-height:72vh;overflow-y:auto}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}
+.sec-title{font-size:11px;color:var(--text3);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+.detail-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.detail-label{color:var(--text2);display:flex;align-items:center;gap:5px}
+.detail-val{font-weight:600}
+.stage-btns{display:flex;gap:5px;flex-wrap:wrap}
+.stage-btn{font-size:11px;padding:5px 11px;border:1px solid var(--border2);border-radius:100px;background:transparent;cursor:pointer;color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
+.stage-btn:hover{background:var(--surface2)}
+.stage-btn.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-text)}
+.hist-wrap{max-height:180px;overflow-y:auto}
+.hist-item{display:flex;gap:8px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-date{color:var(--text3);min-width:80px;flex-shrink:0}
+.hist-chip{display:inline-block;padding:1px 6px;border-radius:100px;font-size:10px;font-weight:700;margin-right:4px}
+.hist-stage{background:var(--purple-bg);color:var(--purple-text)}
+.hist-deadline{background:var(--amber-bg);color:var(--amber-text)}
+.hist-note{background:var(--surface2);color:var(--text2)}
+.hist-reg{background:var(--green-bg);color:var(--green-text)}
+.add-hist{display:flex;gap:7px;margin-top:10px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px;font-weight:600}
+.field input,.field select,.field textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-family:inherit;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:68px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* PERMISSION MATRIX */
+.perm-table{width:100%;border-collapse:collapse}
+.perm-table th,.perm-table td{padding:10px 14px;border:1px solid var(--border);font-size:13px;text-align:center}
+.perm-table th{background:var(--surface2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.perm-table td:first-child{text-align:left;font-weight:500}
+.perm-check{width:18px;height:18px;accent-color:var(--accent)}
+
+/* VENDOR TABS */
+.vendor-tabs-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:0;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.vendor-tabs-wrap::-webkit-scrollbar{display:none}
+.vendor-tab{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:2px solid transparent;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.vendor-tab:hover{color:var(--text);background:var(--bg)}
+.vendor-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.vendor-tab .v-avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.vendor-tab .v-cnt{font-size:10px;padding:1px 6px;border-radius:100px;font-weight:700;background:var(--surface2);color:var(--text2)}
+.vendor-tab.active .v-cnt{background:var(--accent-bg);color:var(--accent-text)}
+
+
+.vendor-summary{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.vsummary-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.vsummary-item strong{font-weight:700;color:var(--text)}
+.vsummary-sep{width:1px;height:16px;background:var(--border2)}
+
+
+/* DEAL VIEW PANEL */
+.deal-view-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:180;justify-content:flex-end}
+.deal-view-overlay.open{display:flex}
+.deal-view-panel{background:var(--surface);width:480px;max-width:100vw;height:100vh;overflow-y:auto;display:flex;flex-direction:column;box-shadow:var(--sh-lg);animation:slideInR .22s ease}
+@keyframes slideInR{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.dvp-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.dvp-head h2{font-size:15px;font-weight:700;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px}
+.dvp-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:18px}
+.dvp-stage-track{display:flex;align-items:center;gap:0;margin:4px 0}
+.dvp-stage-step{flex:1;text-align:center;position:relative}
+.dvp-stage-step::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--border2);z-index:0}
+.dvp-stage-step:last-child::after{display:none}
+.dvp-stage-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 5px;position:relative;z-index:1;font-size:12px;border:2px solid var(--border2);background:var(--surface)}
+.dvp-stage-dot.done{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.dvp-stage-dot.current{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.dvp-stage-label{font-size:10px;color:var(--text3);font-weight:500}
+.dvp-stage-label.current{color:var(--accent);font-weight:700}
+.dvp-stage-label.done{color:var(--green-text)}
+.dvp-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dvp-info-item{background:var(--bg);border-radius:var(--r-sm);padding:10px 12px}
+.dvp-info-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.dvp-info-val{font-size:13px;font-weight:600;color:var(--text)}
+.dvp-timeline{display:flex;flex-direction:column;gap:0}
+.dvp-tl-item{display:flex;gap:12px;padding:8px 0}
+.dvp-tl-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.dvp-tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.dvp-tl-connector{width:2px;flex:1;background:var(--border);margin-top:3px;min-height:16px}
+.dvp-tl-item:last-child .dvp-tl-connector{display:none}
+.dvp-tl-content{flex:1;padding-bottom:4px}
+.dvp-tl-date{font-size:11px;color:var(--text3);margin-bottom:2px}
+.dvp-tl-text{font-size:13px;color:var(--text)}
+.dvp-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;position:sticky;bottom:0;background:var(--surface)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--text);color:#fff;font-size:13px;padding:11px 16px;border-radius:var(--r);box-shadow:var(--sh-md);display:flex;align-items:center;gap:8px;animation:toastIn .25s ease;font-weight:500;pointer-events:auto}
+.toast.success{background:#166534}
+.toast.danger{background:var(--red)}
+@keyframes toastIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
+
+</style>
+</head>
+<body>
+<!-- ===== AUTH ===== -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><i class="ti ti-building"></i></div>
+      <h1>thynC EMR</h1>
+    </div>
+    <h2>로그인</h2>
+    <p>계정 정보를 입력하여 시작하세요</p>
+    <div class="auth-error" id="authError"><i class="ti ti-alert-circle" style="font-size:13px"></i> <span id="authErrorMsg">이메일 또는 비밀번호가 올바르지 않습니다</span></div>
+    <div class="auth-field"><label>이메일</label><input type="email" id="loginEmail" placeholder="admin@company.com" value="admin@company.com"></div>
+    <div class="auth-field"><label>비밀번호</label><input type="password" id="loginPw" placeholder="비밀번호 입력" value="1234"></div>
+    <button class="auth-btn" id="loginBtn">로그인</button>
+    <div class="auth-hint">
+      테스트 계정<br>
+      <code>admin@company.com</code> / <code>1234</code> — 관리자<br>
+      <code>kim@company.com</code> / <code>1234</code> — 매니저<br>
+      <code>park@company.com</code> / <code>1234</code> — 병원담당자
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appShell">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand" onclick="setTab('pipeline')">
+      <div class="logo-icon"><i class="ti ti-building"></i></div>
+      <h1>thynC EMR</h1>
+    </div>
+    <div class="topbar-center">
+      <button class="nav-tab active" id="tab-pipeline" onclick="setTab('pipeline')"><i class="ti ti-layout-kanban" style="font-size:14px"></i> 파이프라인</button>
+      <button class="nav-tab" id="tab-admin" onclick="setTab('admin')" style="display:none"><i class="ti ti-settings" style="font-size:14px"></i> 관리자 <span class="badge" id="adminBadge" style="display:none">!</span></button>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" id="searchInput" placeholder="거래처 검색..." oninput="render()">
+      </div>
+      <div class="notif-wrap">
+        <button class="btn" onclick="toggleAlerts()"><i class="ti ti-bell"></i> 알람</button>
+        <div class="notif-badge" id="notifBadge">0</div>
+      </div>
+      <div class="user-chip" onclick="showUserMenu()" id="userChip">
+        <div class="avatar" id="avatarEl"></div>
+        <span id="userNameEl">-</span>
+        <i class="ti ti-chevron-down" style="font-size:12px;color:var(--text3)"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE PAGE -->
+  <div class="page active" id="page-pipeline">
+    <div id="alertSection" style="display:none;padding:14px 24px 0">
+      <div class="alert-panel">
+        <div class="alert-panel-head" onclick="toggleAlerts()">
+          <span><i class="ti ti-bell-ringing" style="font-size:14px"></i> 알람 센터 <em id="alertCountLabel" style="font-weight:400;font-size:12px;color:var(--text2);font-style:normal"></em></span>
+          <i class="ti ti-chevron-up" style="font-size:14px;color:var(--text3)"></i>
+        </div>
+        <div id="alertList"></div>
+      </div>
+    </div>
+    <div id="vendorTabsWrap" class="vendor-tabs-wrap"></div>
+    <div id="vendorSummary" class="vendor-summary" style="display:none"></div>
+    <div class="stats" id="statsBar"></div>
+    <div class="filters">
+      <label>필터</label>
+      <select id="filterAssignee" onchange="syncVendorTabFromFilter();render()">
+        <option value="">전체 담당자</option>
+      </select>
+      <select id="filterDeadline" onchange="render()">
+        <option value="">마감일 전체</option>
+        <option value="overdue">기한 초과</option>
+        <option value="today">오늘 마감</option>
+        <option value="soon">3일 이내</option>
+      </select>
+    </div>
+    <div class="board" id="board"></div>
+  </div>
+
+  <!-- ADMIN PAGE -->
+  <div class="page" id="page-admin">
+    <div class="admin-layout">
+      <div class="admin-sidebar">
+        <div class="admin-nav-item active" id="anav-users" onclick="setAdminSection('users')"><i class="ti ti-users"></i> 사용자 관리</div>
+        <div class="admin-nav-item" id="anav-stages" onclick="setAdminSection('stages')"><i class="ti ti-layout-kanban"></i> 단계 관리</div>
+        <div class="admin-nav-item" id="anav-perms" onclick="setAdminSection('perms')"><i class="ti ti-shield"></i> 권한 설정</div>
+        <div class="admin-nav-item" id="anav-log" onclick="setAdminSection('log')"><i class="ti ti-list"></i> 변경 이력</div>
+      </div>
+      <div class="admin-content">
+        <!-- 사용자 관리 -->
+        <div class="admin-section active" id="asec-users">
+          <div class="section-head">
+            <h2><i class="ti ti-users" style="font-size:16px;margin-right:6px;vertical-align:-2px"></i>사용자 관리</h2>
+            <button class="btn btn-primary" onclick="openAddUser()"><i class="ti ti-plus"></i> 사용자 추가</button>
+          </div>
+          <table class="data-table" id="userTable">
+            <thead><tr><th>이름</th><th>이메일</th><th>역할</th><th>상태</th><th>마지막 로그인</th><th>작업</th></tr></thead>
+            <tbody id="userTbody"></tbody>
+          </table>
+        </div>
+        <!-- 단계 관리 -->
+        <div class="admin-section" id="asec-stages">
+          <div class="section-head">
+            <h2><i class="ti ti-layout-kanban" style="font-size:16px;margin-right:6px;vertical-align:-2px"></i>파이프라인 단계 관리</h2>
+            <button class="btn btn-primary" onclick="openAddStageAdmin()"><i class="ti ti-plus"></i> 단계 추가</button>
+          </div>
+          <div class="stage-list" id="stageList"></div>
+        </div>
+        <!-- 권한 설정 -->
+        <div class="admin-section" id="asec-perms">
+          <div class="section-head">
+            <h2><i class="ti ti-shield" style="font-size:16px;margin-right:6px;vertical-align:-2px"></i>역할별 권한 설정</h2>
+            <button class="btn btn-primary" onclick="savePerms()"><i class="ti ti-check"></i> 저장</button>
+          </div>
+          <table class="perm-table" id="permTable"></table>
+          <p style="font-size:12px;color:var(--text3);margin-top:12px"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px"></i> 변경 사항은 저장 후 즉시 적용됩니다.</p>
+        </div>
+        <!-- 변경 이력 -->
+        <div class="admin-section" id="asec-log">
+          <div class="section-head">
+            <h2><i class="ti ti-list" style="font-size:16px;margin-right:6px;vertical-align:-2px"></i>시스템 변경 이력</h2>
+            <button class="btn" onclick="renderAuditLog()"><i class="ti ti-refresh"></i> 새로고침</button>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>날짜/시간</th><th>사용자</th><th>유형</th><th>내용</th></tr></thead>
+            <tbody id="auditTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- DEAL VIEW PANEL -->
+<div class="deal-view-overlay" id="dealViewOverlay" onclick="if(event.target===this)closeDealView()">
+  <div class="deal-view-panel" id="dealViewPanel"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalBox"></div></div>
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+<script>
+// ▼ 서버 주소가 다를 경우 아래 줄 주석 해제 후 수정
+// window.API_BASE = 'http://your-server.com:4000';
+
+// ===== CONFIG =====
+const API = (window.API_BASE || 'http://localhost:4000') + '/api';
+
+// ===== STATE =====
+let currentUser = null;
+let token = localStorage.getItem('thyc_token') || null;
+let STAGES = [], GROUPS = [], USERS = [], DEALS = [];
+let PERMS = {};
+let activeVendorTab = 'all';
+let dismissed = new Set();
+let stageAlerts = [];
+
+// ===== API HELPER =====
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || '서버 오류');
+  return data;
+}
+
+// ===== HELPERS =====
+function diffDays(d) { if (!d) return null; const t = new Date(d), n = new Date(); n.setHours(0,0,0,0); return Math.round((t - n) / 864e5); }
+function dlStatus(d) { const n = diffDays(d); if (n === null) return null; if (n < 0) return 'overdue'; if (n === 0) return 'today'; if (n <= 3) return 'soon'; return 'normal'; }
+function dlLabel(d) { const n = diffDays(d); if (n === null) return ''; if (n < 0) return Math.abs(n) + '일 초과'; if (n === 0) return '오늘'; return 'D-' + n; }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function can(perm) { return !!(PERMS[perm]); }
+function roleLabel(r) { return r==='admin'?'관리자':r==='hospital'?'병원담당자':r==='manager'?'매니저':'일반'; }
+function roleCls(r) { return r==='admin'?'role-admin':r==='hospital'?'role-hospital':r==='manager'?'role-manager':'role-member'; }
+function getAssigneeName(aid) { const u = USERS.find(x => x.id === aid); return u ? (u.assignee_label || u.name) : '—'; }
+
+// ===== TOAST =====
+function toast(msg, type = '') {
+  const w = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.innerHTML = `<i class="ti ti-${type==='success'?'check':type==='danger'?'alert-circle':'info-circle'}" style="font-size:14px"></i>${msg}`;
+  w.appendChild(el);
+  setTimeout(() => { el.style.animation = 'toastOut .25s ease forwards'; setTimeout(() => el.remove(), 250); }, 2800);
+}
+
+// ===== AUTH =====
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  const errEl = document.getElementById('authError');
+  errEl.style.display = 'none';
+  try {
+    const data = await api('POST', '/auth/login', { email, password: pw });
+    token = data.token;
+    localStorage.setItem('thyc_token', token);
+    currentUser = data.user;
+    PERMS = data.user.perms;
+    await bootApp();
+  } catch (e) {
+    errEl.style.display = 'flex';
+    document.getElementById('authErrorMsg').textContent = e.message;
+  }
+}
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function doLogout() {
+  token = null; currentUser = null; PERMS = {};
+  localStorage.removeItem('thyc_token');
+  STAGES=[]; GROUPS=[]; USERS=[]; DEALS=[];
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  closeModal();
+}
+
+async function tryAutoLogin() {
+  if (!token) return;
+  try {
+    const me = await api('GET', '/auth/me');
+    currentUser = me; PERMS = me.perms;
+    await bootApp();
+  } catch { token = null; localStorage.removeItem('thyc_token'); }
+}
+
+async function bootApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  const shell = document.getElementById('appShell');
+  shell.style.display = 'flex'; shell.style.flexDirection = 'column';
+  const av = document.getElementById('avatarEl');
+  av.textContent = currentUser.name.slice(0, 1);
+  av.style.background = currentUser.color + '22'; av.style.color = currentUser.color;
+  document.getElementById('userNameEl').textContent = currentUser.name;
+  if (can('manageUsers') || can('manageStages'))
+    document.getElementById('tab-admin').style.display = 'inline-flex';
+  await loadAll();
+  render();
+  toast('환영합니다, ' + currentUser.name + '님!', 'success');
+}
+
+async function loadAll() {
+  const [stages, groups, users, deals] = await Promise.all([
+    api('GET', '/stages'), api('GET', '/groups'),
+    can('manageUsers') ? api('GET', '/users') : Promise.resolve([]),
+    api('GET', '/deals'),
+  ]);
+  STAGES = stages.map(s => ({ id: s.id, label: s.label, color: s.color, bg: s.bg_color, tc: s.text_color, order: s.sort_order }));
+  GROUPS = groups.map(g => ({ id: g.id, label: g.label, color: g.color, icon: g.icon }));
+  USERS  = users.map(u => ({ id: u.id, name: u.name, assigneeLabel: u.assignee_label || u.name, email: u.email, role: u.role, color: u.color, active: u.active, lastLogin: u.last_login }));
+  DEALS  = deals.map(mapDeal);
+  updateAssigneeFilter();
+}
+
+function mapDeal(d) {
+  return {
+    id: d.id, name: d.name, emrVendor: d.emr_vendor,
+    contact: d.contact, phone: d.phone, email: d.email,
+    assigneeId: d.assignee_id, groupId: d.group_id, stage: d.stage_id,
+    deadline: d.deadline ? d.deadline.slice(0,10) : null,
+    note: d.note, history: d.history || [],
+  };
+}
+
+// ===== TABS =====
+function setTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'admin') renderAdmin();
+}
+
+// ===== ALERTS =====
+function buildAlerts() {
+  const items = [];
+  DEALS.forEach(d => {
+    const s = dlStatus(d.deadline), key = 'dl-' + d.id;
+    if (!dismissed.has(key)) {
+      if (s === 'overdue') items.push({ key, cls: 'overdue', icon: 'ti-calendar-x', title: `[${d.name}] 마감일 초과`, sub: `${d.deadline} (${dlLabel(d.deadline)}) — ${getAssigneeName(d.assigneeId)}` });
+      else if (s === 'today') items.push({ key, cls: 'today', icon: 'ti-calendar-event', title: `[${d.name}] 오늘 마감`, sub: `${d.deadline} — ${getAssigneeName(d.assigneeId)}` });
+      else if (s === 'soon') items.push({ key, cls: 'soon', icon: 'ti-calendar-time', title: `[${d.name}] 마감 임박`, sub: `${d.deadline} (${dlLabel(d.deadline)}) — ${getAssigneeName(d.assigneeId)}` });
+    }
+  });
+  stageAlerts.forEach(a => { if (!dismissed.has(a.key)) items.push(a); });
+  return items;
+}
+function renderAlerts() {
+  const items = buildAlerts(), cnt = items.length;
+  const badge = document.getElementById('notifBadge');
+  badge.textContent = cnt > 9 ? '9+' : cnt;
+  badge.style.display = cnt > 0 ? 'flex' : 'none';
+  document.getElementById('alertCountLabel').textContent = cnt > 0 ? `(${cnt}건)` : '(없음)';
+  const list = document.getElementById('alertList');
+  if (!cnt) { list.innerHTML = `<div style="padding:13px 16px;font-size:13px;color:var(--text2);text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-check" style="font-size:14px;color:var(--green)"></i>처리할 알람이 없습니다</div>`; return; }
+  list.innerHTML = items.map(a => `
+    <div class="alert-item">
+      <div class="alert-ico ${a.cls}"><i class="ti ${a.icon}"></i></div>
+      <div style="flex:1"><div class="alert-title">${a.title}</div><div class="alert-sub">${a.sub}</div></div>
+      <div class="alert-dismiss" onclick="dismissAlert('${a.key}')"><i class="ti ti-x" style="font-size:13px"></i></div>
+    </div>`).join('');
+}
+function dismissAlert(key) { dismissed.add(key); renderAlerts(); }
+let alertOpen = false;
+function toggleAlerts() {
+  alertOpen = !alertOpen;
+  document.getElementById('alertSection').style.display = alertOpen ? 'block' : 'none';
+  if (alertOpen) renderAlerts();
+}
+
+// ===== STATS =====
+function renderStats() {
+  const visible = getFiltered();
+  const total = visible.length, closed = visible.filter(d => { const s = STAGES.find(x => x.id === d.stage); return s?.label === '연동 완료'; }).length;
+  const ov = visible.filter(d => dlStatus(d.deadline) === 'overdue').length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-card"><div class="stat-label">전체 거래처</div><div class="stat-val">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">연동 완료</div><div class="stat-val">${closed}건</div></div>
+    <div class="stat-card"><div class="stat-label">진행 중</div><div class="stat-val">${total - closed}건</div></div>
+    <div class="stat-card"><div class="stat-label">마감 초과</div><div class="stat-val danger">${ov}건</div></div>`;
+}
+
+function updateAssigneeFilter() {
+  const sel = document.getElementById('filterAssignee');
+  sel.innerHTML = '<option value="">전체 담당자</option>';
+  const viewAll = can('viewAll');
+  (USERS.length ? USERS : [currentUser]).filter(u => u && u.active !== false).forEach(u => {
+    if (viewAll || u.id === currentUser.id) {
+      const o = document.createElement('option');
+      o.value = u.id; o.textContent = u.assigneeLabel || u.name; sel.appendChild(o);
+    }
+  });
+}
+
+function getFiltered() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const asgn = document.getElementById('filterAssignee')?.value || '';
+  const dl = document.getElementById('filterDeadline')?.value || '';
+  const viewAll = can('viewAll');
+  return DEALS.filter(d => {
+    if (!viewAll && d.assigneeId !== currentUser.id) return false;
+    if (activeVendorTab === 'none') { if (d.groupId && GROUPS.find(g => g.id === d.groupId)) return false; }
+    else if (activeVendorTab !== 'all') { if (d.groupId !== activeVendorTab) return false; }
+    if (q && !d.name.toLowerCase().includes(q) && !d.contact?.toLowerCase().includes(q) && !(d.emrVendor||'').toLowerCase().includes(q)) return false;
+    if (asgn && d.assigneeId !== asgn) return false;
+    if (dl && dlStatus(d.deadline) !== dl) return false;
+    return true;
+  });
+}
+
+// ===== VENDOR TABS =====
+function renderVendorTabs() {
+  const basDeals = can('viewAll') ? DEALS : DEALS.filter(d => d.assigneeId === currentUser.id);
+  const wrap = document.getElementById('vendorTabsWrap');
+  const summary = document.getElementById('vendorSummary');
+  const tabs = [{ id: 'all', label: '전체', group: null, deals: basDeals }];
+  GROUPS.forEach(g => tabs.push({ id: g.id, label: g.label, group: g, deals: basDeals.filter(d => d.groupId === g.id) }));
+  const ungrouped = basDeals.filter(d => !d.groupId || !GROUPS.find(g => g.id === d.groupId));
+  if (ungrouped.length) tabs.push({ id: 'none', label: '미분류', group: null, deals: ungrouped, isNone: true });
+
+  wrap.innerHTML = tabs.map(t => {
+    const cnt = t.deals.length, ov = t.deals.filter(d => dlStatus(d.deadline) === 'overdue').length;
+    const ovHtml = ov > 0 ? `<span style="font-size:10px;padding:1px 5px;border-radius:100px;background:var(--red-bg);color:var(--red-text);font-weight:700;margin-left:2px">${ov}</span>` : '';
+    let avatarHtml = t.group
+      ? `<span class="v-avatar" style="background:${t.group.color}22;color:${t.group.color}"><i class="ti ${t.group.icon}" style="font-size:11px"></i></span>`
+      : `<span class="v-avatar" style="background:var(--surface2);color:var(--text2)"><i class="ti ${t.isNone?'ti-help':'ti-layout-grid'}" style="font-size:11px"></i></span>`;
+    return `<button class="vendor-tab${activeVendorTab === t.id ? ' active' : ''}" onclick="setVendorTab('${t.id}')">
+      ${avatarHtml}<span>${t.label}</span><span class="v-cnt">${cnt}</span>${ovHtml}
+    </button>`;
+  }).join('');
+  if (can('manageStages'))
+    wrap.innerHTML += `<button class="vendor-tab" onclick="openAddGroup()" style="color:var(--text3)"><i class="ti ti-plus" style="font-size:13px"></i> 그룹 추가</button>`;
+
+  if (activeVendorTab !== 'all') {
+    const t = tabs.find(x => x.id === activeVendorTab);
+    if (t && t.deals.length > 0) {
+      const sortedStages = [...STAGES].sort((a, b) => a.order - b.order);
+      const breakdown = sortedStages.map(s => {
+        const n = t.deals.filter(d => d.stage === s.id).length;
+        return n > 0 ? `<div class="vsummary-item"><span style="background:${s.color};width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0"></span><span>${s.label}</span><strong>${n}</strong></div>` : '';
+      }).filter(Boolean).join('<div class="vsummary-sep"></div>');
+      const rate = t.deals.length ? Math.round(t.deals.filter(d => STAGES.find(s=>s.id===d.stage)?.label==='연동 완료').length / t.deals.length * 100) : 0;
+      const grp = t.group;
+      summary.style.display = 'flex';
+      summary.innerHTML = `
+        ${grp ? `<div class="vsummary-item"><span style="width:10px;height:10px;border-radius:50%;background:${grp.color};display:inline-block;flex-shrink:0"></span><strong style="color:${grp.color}">${grp.label}</strong></div><div class="vsummary-sep"></div>` : ''}
+        <div class="vsummary-item"><i class="ti ti-trophy" style="font-size:13px;color:var(--amber)"></i><span>전환율</span><strong>${rate}%</strong></div>
+        <div class="vsummary-sep"></div>${breakdown}
+        ${grp && can('manageStages') ? `<div class="vsummary-sep"></div><button class="btn btn-sm" onclick="openEditGroup('${grp.id}')"><i class="ti ti-edit"></i> 그룹 편집</button><button class="btn btn-sm btn-danger" onclick="deleteGroup('${grp.id}')"><i class="ti ti-trash"></i></button>` : ''}`;
+    } else { summary.style.display = t ? 'flex' : 'none'; if(t) summary.innerHTML = `<div class="vsummary-item" style="color:var(--text3)"><i class="ti ti-inbox" style="font-size:14px"></i> 이 그룹에 거래처가 없습니다</div>`; }
+  } else { summary.style.display = 'none'; }
+}
+function setVendorTab(id) { activeVendorTab = id; render(); }
+
+// ===== BOARD =====
+const ITAG = {};
+function render() {
+  renderVendorTabs(); renderStats(); renderAlerts();
+  const filtered = getFiltered();
+  const sortedStages = [...STAGES].sort((a, b) => a.order - b.order);
+  document.getElementById('board').style.gridTemplateColumns = `repeat(${sortedStages.length}, minmax(0,1fr))`;
+  document.getElementById('board').innerHTML = sortedStages.map(s => {
+    const cards = filtered.filter(d => d.stage === s.id);
+    return `<div class="col">
+      <div class="col-header">
+        <span class="col-title"><span class="col-dot" style="background:${s.color}"></span>${s.label}</span>
+        <span class="col-cnt" style="background:${s.bg};color:${s.tc}">${cards.length}</span>
+      </div>
+      <div class="col-body">
+        ${cards.map(d => {
+          const ds = dlStatus(d.deadline), cls = 'card' + (ds==='overdue'?' overdue':ds==='today'?' due-today':'');
+          const dlB = d.deadline ? `<span class="dl-badge ${ds||'normal'}"><i class="ti ti-calendar" style="font-size:10px"></i>${dlLabel(d.deadline)}</span>` : '';
+          const grp = GROUPS.find(x => x.id === d.groupId);
+          const grpBadge = grp ? `<span style="font-size:10px;padding:2px 6px;border-radius:100px;font-weight:600;background:${grp.color}18;color:${grp.color}"><i class="ti ${grp.icon}" style="font-size:10px"></i> ${grp.label}</span>` : '';
+          return `<div class="${cls}" onclick="openDealView('${d.id}')">
+            <div class="card-name">${d.name}</div>
+            ${d.emrVendor ? `<div style="font-size:11px;color:var(--accent-text);font-weight:600;margin-bottom:2px"><i class="ti ti-building-hospital" style="font-size:11px"></i> ${d.emrVendor}</div>` : ''}
+            <div class="card-meta">${d.contact||''} · ${getAssigneeName(d.assigneeId)}</div>
+            <div class="card-footer">${grpBadge}${dlB}</div>
+          </div>`;
+        }).join('')}
+        ${can('addDeal') ? `<button class="add-col-btn" onclick="openAddStage('${s.id}')"><i class="ti ti-plus" style="font-size:13px"></i> 추가</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== DEAL VIEW PANEL =====
+async function openDealView(id) {
+  const d = await api('GET', `/deals/${id}`);
+  const deal = mapDeal(d);
+  deal.history = (d.history || []).map(h => ({ date: h.created_at?.slice(0,10)||'', type: h.type, text: h.text, user: h.user_name || '' }));
+  const sortedStages = [...STAGES].sort((a, b) => a.order - b.order);
+  const curIdx = sortedStages.findIndex(s => s.id === deal.stage);
+  const ds = dlStatus(deal.deadline);
+  const dlColor = ds==='overdue'?'var(--red)':ds==='today'?'var(--amber)':ds==='soon'?'var(--accent)':'var(--text)';
+  const grp = GROUPS.find(x => x.id === deal.groupId);
+  const canEdit = can('editDeal'), canDel = can('deleteDeal'), canStage = can('changeStage'), canDL = can('changeDeadline');
+
+  const stageTrack = sortedStages.map((s, i) => {
+    const cls = i < curIdx ? 'done' : i === curIdx ? 'current' : '';
+    const icon = i < curIdx ? 'ti-check' : i === curIdx ? 'ti-circle-filled' : 'ti-circle';
+    return `<div class="dvp-stage-step">
+      <div class="dvp-stage-dot ${cls}"><i class="ti ${icon}" style="font-size:11px"></i></div>
+      <div class="dvp-stage-label ${cls}">${s.label}</div>
+    </div>`;
+  }).join('');
+
+  const typeColor = { stage: '#7C3AED', deadline: '#D97706', reg: '#16A34A', note: '#94A3B8' };
+  const timelineHtml = deal.history.slice().reverse().map(h => {
+    const col = typeColor[h.type] || '#94A3B8';
+    const chipLabel = h.type==='stage'?'단계':h.type==='deadline'?'마감일':h.type==='reg'?'등록':'메모';
+    return `<div class="dvp-tl-item">
+      <div class="dvp-tl-line"><div class="dvp-tl-dot" style="background:${col}"></div><div class="dvp-tl-connector"></div></div>
+      <div class="dvp-tl-content">
+        <div class="dvp-tl-date">${h.date}${h.user?' · '+h.user:''}</div>
+        <div class="dvp-tl-text"><span style="display:inline-block;font-size:10px;padding:1px 6px;border-radius:100px;background:${col}22;color:${col};font-weight:700;margin-right:5px">${chipLabel}</span>${h.text}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dealViewPanel').innerHTML = `
+    <div class="dvp-head">
+      <h2><span style="width:8px;height:8px;border-radius:50%;background:${sortedStages[curIdx]?.color||'#94A3B8'};display:inline-block;flex-shrink:0"></span>${deal.name}</h2>
+      <button class="btn" onclick="closeDealView()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="dvp-body">
+      <div><div class="sec-title">파이프라인 단계</div><div class="dvp-stage-track">${stageTrack}</div></div>
+      ${deal.emrVendor ? `<div><div class="dvp-info-label" style="margin-bottom:4px">EMR 업체명</div><div style="font-size:15px;font-weight:700;color:var(--accent-text);display:flex;align-items:center;gap:6px"><i class="ti ti-building-hospital" style="font-size:16px"></i>${deal.emrVendor}</div></div>` : ''}
+      <div class="dvp-info-grid">
+        <div class="dvp-info-item"><div class="dvp-info-label">담당자</div><div class="dvp-info-val">${deal.contact||'—'}</div></div>
+        <div class="dvp-info-item"><div class="dvp-info-label">연락처</div><div class="dvp-info-val">${deal.phone||'—'}</div></div>
+        <div class="dvp-info-item"><div class="dvp-info-label">이메일</div><div class="dvp-info-val" style="font-size:12px;word-break:break-all">${deal.email||'—'}</div></div>
+        <div class="dvp-info-item"><div class="dvp-info-label">내부 담당</div><div class="dvp-info-val">${getAssigneeName(deal.assigneeId)}</div></div>
+        <div class="dvp-info-item"><div class="dvp-info-label">마감일</div><div class="dvp-info-val" style="color:${dlColor}">${deal.deadline ? deal.deadline+' ('+dlLabel(deal.deadline)+')' : '미설정'}</div></div>
+        <div class="dvp-info-item"><div class="dvp-info-label">판매처 그룹</div><div class="dvp-info-val">${grp ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:12px;color:${grp.color};font-weight:600"><i class="ti ${grp.icon}" style="font-size:12px"></i>${grp.label}</span>` : '미분류'}</div></div>
+      </div>
+      ${deal.note ? `<div><div class="sec-title">메모</div><p style="font-size:13px;color:var(--text2);line-height:1.6;background:var(--bg);padding:10px 12px;border-radius:var(--r-sm)">${deal.note}</p></div>` : ''}
+      ${canStage ? `<div><div class="sec-title">단계 변경</div><div class="stage-btns">${sortedStages.map(st => `<button class="stage-btn${st.id===deal.stage?' active':''}" onclick="changeStageFromView('${deal.id}','${st.id}')">${st.label}</button>`).join('')}</div></div>` : ''}
+      ${canDL ? `<div><div class="sec-title">마감일 변경</div><div style="display:flex;gap:7px"><input type="date" id="dvpDlInput" value="${deal.deadline||''}" style="flex:1;font-size:13px;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-family:inherit;outline:none"><button class="btn" onclick="saveDeadlineFromView('${deal.id}')"><i class="ti ti-check"></i> 저장</button></div></div>` : ''}
+      <div><div class="sec-title">변경 이력</div><div class="dvp-timeline">${timelineHtml}</div>
+        <div class="add-hist" style="margin-top:12px">
+          <input id="dvpHistInput" type="text" placeholder="이력 메모 추가..." style="flex:1;font-size:13px;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-family:inherit;outline:none">
+          <button class="btn" onclick="addHistFromView('${deal.id}')">추가</button>
+        </div>
+      </div>
+    </div>
+    <div class="dvp-foot">
+      ${canDel ? `<button class="btn btn-danger" onclick="deleteDealFromView('${deal.id}')"><i class="ti ti-trash"></i> 삭제</button>` : ''}
+      ${canEdit ? `<button class="btn" onclick="closeDealView();openEdit('${deal.id}')"><i class="ti ti-edit"></i> 편집</button>` : ''}
+      <button class="btn btn-primary" style="margin-left:auto" onclick="closeDealView()">닫기</button>
+    </div>`;
+  document.getElementById('dealViewOverlay').classList.add('open');
+}
+function closeDealView() { document.getElementById('dealViewOverlay').classList.remove('open'); }
+
+async function changeStageFromView(id, stageId) {
+  try {
+    await api('PATCH', `/deals/${id}`, { stageId });
+    stageAlerts.push({ key: 'stage-' + id + '-' + Date.now(), cls: 'stage', icon: 'ti-arrows-exchange', title: `단계 변경`, sub: STAGES.find(s=>s.id===stageId)?.label || '' });
+    toast('단계가 변경되었습니다', 'success');
+    await loadAll(); render(); openDealView(id);
+  } catch (e) { toast(e.message, 'danger'); }
+}
+async function saveDeadlineFromView(id) {
+  const val = document.getElementById('dvpDlInput').value;
+  try {
+    await api('PATCH', `/deals/${id}`, { deadline: val || null });
+    dismissed.delete('dl-' + id);
+    toast('마감일이 저장되었습니다', 'success');
+    await loadAll(); render(); openDealView(id);
+  } catch (e) { toast(e.message, 'danger'); }
+}
+async function addHistFromView(id) {
+  const inp = document.getElementById('dvpHistInput'), text = inp.value.trim();
+  if (!text) return;
+  await api('POST', `/deals/${id}/history`, { text });
+  inp.value = ''; openDealView(id);
+}
+async function deleteDealFromView(id) {
+  if (!confirm('거래처를 삭제하시겠습니까?')) return;
+  try { await api('DELETE', `/deals/${id}`); toast('삭제되었습니다'); closeDealView(); await loadAll(); render(); }
+  catch (e) { toast(e.message, 'danger'); }
+}
+
+// ===== DEAL FORM =====
+function openAdd() { openAddStage(STAGES[0]?.id || ''); }
+function openAddStage(stageId) { document.getElementById('modalBox').innerHTML = buildForm(null, stageId); document.getElementById('modalOverlay').classList.add('open'); }
+async function openEdit(id) {
+  const d = await api('GET', `/deals/${id}`);
+  const deal = mapDeal(d);
+  document.getElementById('modalBox').innerHTML = buildForm(deal, deal.stage);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function buildForm(d, stage) {
+  const ie = !!d;
+  const dfltGroup = activeVendorTab !== 'all' && activeVendorTab !== 'none' ? activeVendorTab : '';
+  const assigneeOpts = (USERS.length ? USERS : [currentUser]).filter(u => u?.active !== false).map(u =>
+    `<option value="${u.id}"${d && d.assigneeId === u.id ? ' selected' : ''}>${u.assigneeLabel || u.name}</option>`).join('');
+  const stageOpts = [...STAGES].sort((a,b) => a.order - b.order).map(s =>
+    `<option value="${s.id}"${(d ? d.stage : stage) === s.id ? ' selected' : ''}>${s.label}</option>`).join('');
+  const groupOpts = `<option value="">미분류</option>` + GROUPS.map(g =>
+    `<option value="${g.id}"${(d ? d.groupId : dfltGroup) === g.id ? ' selected' : ''}>${g.label}</option>`).join('');
+  return `
+    <div class="modal-head"><h2>${ie ? '거래처 편집' : '거래처 추가'}</h2><button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label>거래처명 *</label><input id="f-name" value="${d ? d.name : ''}" placeholder="(주)예시병원"></div>
+      <div class="field"><label><i class="ti ti-building-hospital" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>EMR 업체명</label><input id="f-emr" value="${(d && d.emrVendor) ? d.emrVendor : ''}" placeholder="예: 이지케어텍, 유비케어..."></div>
+      <div class="row2">
+        <div class="field"><label>담당자명</label><input id="f-contact" value="${d ? d.contact||'' : ''}" placeholder="홍길동"></div>
+        <div class="field"><label>연락처</label><input id="f-phone" value="${d ? d.phone||'' : ''}" placeholder="010-0000-0000"></div>
+      </div>
+      <div class="field"><label>이메일</label><input id="f-email" value="${d ? d.email||'' : ''}" placeholder="example@hospital.com"></div>
+      <div class="row2">
+        <div class="field"><label>내부 담당자</label><select id="f-assignee">${assigneeOpts}</select></div>
+        <div class="field"><label>마감일</label><input id="f-deadline" type="date" value="${d && d.deadline ? d.deadline : ''}"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>영업 단계</label><select id="f-stage">${stageOpts}</select></div>
+        <div class="field"><label>판매처 그룹</label><select id="f-group">${groupOpts}</select></div>
+      </div>
+      <div class="field"><label>메모</label><textarea id="f-note">${d ? d.note||'' : ''}</textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveDeal('${d ? d.id : 'null'}')">${ie ? '저장' : '추가'}</button>
+    </div>`;
+}
+
+async function saveDeal(id) {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('거래처명을 입력하세요', 'danger'); return; }
+  const body = {
+    name,
+    emrVendor:  document.getElementById('f-emr').value.trim() || null,
+    contact:    document.getElementById('f-contact').value.trim() || null,
+    phone:      document.getElementById('f-phone').value.trim() || null,
+    email:      document.getElementById('f-email').value.trim() || null,
+    assigneeId: document.getElementById('f-assignee').value || null,
+    stageId:    document.getElementById('f-stage').value || null,
+    groupId:    document.getElementById('f-group').value || null,
+    deadline:   document.getElementById('f-deadline').value || null,
+    note:       document.getElementById('f-note').value.trim() || null,
+  };
+  try {
+    if (id !== 'null') { await api('PATCH', `/deals/${id}`, body); toast('저장되었습니다', 'success'); }
+    else               { await api('POST',  '/deals', body);       toast('거래처가 추가되었습니다', 'success'); }
+    closeModal(); await loadAll(); render();
+  } catch (e) { toast(e.message, 'danger'); }
+}
+
+// ===== USER MENU =====
+function showUserMenu() {
+  document.getElementById('modalBox').innerHTML = `
+    <div class="modal-head"><h2>내 계정</h2><button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:12px;padding:6px 0">
+        <div class="avatar" style="width:48px;height:48px;font-size:18px;background:${currentUser.color}22;color:${currentUser.color}">${currentUser.name.slice(0,1)}</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">${currentUser.name}</div>
+          <div style="font-size:12px;color:var(--text2)">${currentUser.email}</div>
+          <span class="role-badge ${roleCls(currentUser.role)}" style="margin-top:4px;display:inline-block">${roleLabel(currentUser.role)}</span>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title">비밀번호 변경</div>
+        <div class="field"><label>새 비밀번호</label><input type="password" id="newPwInput" placeholder="새 비밀번호 입력"></div>
+        <button class="btn" style="margin-top:6px" onclick="changeSelfPw()"><i class="ti ti-lock"></i> 변경</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger" onclick="doLogout()"><i class="ti ti-logout"></i> 로그아웃</button>
+      <button class="btn" onclick="closeModal()">닫기</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+async function changeSelfPw() {
+  const v = document.getElementById('newPwInput').value.trim();
+  if (!v || v.length < 2) { toast('비밀번호를 2자 이상 입력하세요', 'danger'); return; }
+  try { await api('PATCH', '/auth/password', { password: v }); toast('비밀번호가 변경되었습니다', 'success'); closeModal(); }
+  catch (e) { toast(e.message, 'danger'); }
+}
+
+// ===== ADMIN =====
+function renderAdmin() { renderUserTable(); renderStageList(); renderPermTable(); }
+
+// USER TABLE
+function renderUserTable() {
+  document.getElementById('userTbody').innerHTML = USERS.map(u => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="background:${u.color}22;color:${u.color}">${u.name.slice(0,1)}</div>${u.name}</div></td>
+      <td style="color:var(--text2)">${u.email}</td>
+      <td><span class="role-badge ${roleCls(u.role)}">${roleLabel(u.role)}</span></td>
+      <td><span style="font-size:12px;padding:2px 8px;border-radius:100px;font-weight:600;background:${u.active?'var(--green-bg)':'var(--surface2)'};color:${u.active?'var(--green-text)':'var(--text3)'}">${u.active?'활성':'비활성'}</span></td>
+      <td style="color:var(--text2);font-size:12px">${u.lastLogin ? (typeof u.lastLogin === 'string' ? u.lastLogin.slice(0,16).replace('T',' ') : u.lastLogin) : '—'}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-sm" onclick="openEditUser('${u.id}')"><i class="ti ti-edit"></i></button>
+        ${u.id !== currentUser.id ? `<button class="btn btn-sm ${u.active?'btn-danger':''}" onclick="toggleUserActive('${u.id}',${!u.active})">${u.active?'<i class="ti ti-ban"></i>':'<i class="ti ti-check"></i>'}</button>` : ''}
+        ${u.id !== currentUser.id && u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')"><i class="ti ti-trash"></i></button>` : ''}
+      </div></td>
+    </tr>`).join('');
+}
+function openAddUser() { document.getElementById('modalBox').innerHTML = buildUserForm(null); document.getElementById('modalOverlay').classList.add('open'); }
+function openEditUser(uid) { const u = USERS.find(x => x.id === uid); document.getElementById('modalBox').innerHTML = buildUserForm(u); document.getElementById('modalOverlay').classList.add('open'); }
+function buildUserForm(u) {
+  const ie = !!u;
+  return `
+    <div class="modal-head"><h2>${ie?'사용자 편집':'사용자 추가'}</h2><button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="row2">
+        <div class="field"><label>이름 *</label><input id="uf-name" value="${u?u.name:''}" placeholder="홍길동"></div>
+        <div class="field"><label>표시 이름</label><input id="uf-label" value="${u?u.assigneeLabel||'':''}" placeholder="홍팀장"></div>
+      </div>
+      <div class="field"><label>이메일 *</label><input id="uf-email" type="email" value="${u?u.email:''}" placeholder="user@company.com"></div>
+      <div class="field"><label>${ie?'새 비밀번호 (변경 시만 입력)':'비밀번호 *'}</label><input id="uf-pw" type="password" placeholder="비밀번호"></div>
+      <div class="row2">
+        <div class="field"><label>역할</label><select id="uf-role">
+          <option value="member"${u&&u.role==='member'?' selected':''}>일반</option>
+          <option value="hospital"${u&&u.role==='hospital'?' selected':''}>병원담당자</option>
+          <option value="manager"${u&&u.role==='manager'?' selected':''}>매니저</option>
+          <option value="admin"${u&&u.role==='admin'?' selected':''}>관리자</option>
+        </select></div>
+        <div class="field"><label>색상</label><input id="uf-color" type="color" value="${u?u.color:'#1A56DB'}" style="height:38px;padding:4px 6px"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveUser('${u?u.id:"null"}')">${ie?'저장':'추가'}</button>
+    </div>`;
+}
+async function saveUser(uid) {
+  const name = document.getElementById('uf-name').value.trim(), email = document.getElementById('uf-email').value.trim();
+  if (!name || !email) { toast('이름과 이메일은 필수입니다', 'danger'); return; }
+  const body = { name, assigneeLabel: document.getElementById('uf-label').value.trim()||name, email, role: document.getElementById('uf-role').value, color: document.getElementById('uf-color').value };
+  const pw = document.getElementById('uf-pw').value;
+  if (pw) body.password = pw;
+  try {
+    if (uid !== 'null') { await api('PATCH', `/users/${uid}`, body); toast('수정되었습니다', 'success'); }
+    else { if (!pw) { toast('비밀번호를 입력하세요', 'danger'); return; } await api('POST', '/users', body); toast('사용자가 추가되었습니다', 'success'); }
+    closeModal(); const users = await api('GET', '/users'); USERS = users.map(u => ({ id:u.id,name:u.name,assigneeLabel:u.assignee_label||u.name,email:u.email,role:u.role,color:u.color,active:u.active,lastLogin:u.last_login }));
+    updateAssigneeFilter(); renderUserTable();
+  } catch (e) { toast(e.message, 'danger'); }
+}
+async function toggleUserActive(uid, active) {
+  await api('PATCH', `/users/${uid}`, { active }); const users = await api('GET', '/users');
+  USERS = users.map(u => ({ id:u.id,name:u.name,assigneeLabel:u.assignee_label||u.name,email:u.email,role:u.role,color:u.color,active:u.active,lastLogin:u.last_login }));
+  updateAssigneeFilter(); renderUserTable();
+}
+async function deleteUser(uid) {
+  if (!confirm('사용자를 삭제하시겠습니까?')) return;
+  try { await api('DELETE', `/users/${uid}`); toast('삭제되었습니다'); const users = await api('GET','/users'); USERS=users.map(u=>({id:u.id,name:u.name,assigneeLabel:u.assignee_label||u.name,email:u.email,role:u.role,color:u.color,active:u.active,lastLogin:u.last_login})); updateAssigneeFilter(); renderUserTable(); }
+  catch(e){ toast(e.message,'danger'); }
+}
+
+// STAGE SETTINGS
+function renderStageList() {
+  const sorted = [...STAGES].sort((a,b)=>a.order-b.order);
+  document.getElementById('stageList').innerHTML = sorted.map((s,i) => `
+    <div class="stage-row">
+      <span class="stage-color-dot" style="background:${s.color}"></span>
+      <span class="stage-row-name">${s.label}</span>
+      <span style="font-size:11px;color:var(--text3)">거래처 ${DEALS.filter(d=>d.stage===s.id).length}건</span>
+      <div class="stage-order-btns">
+        ${i>0?`<button class="btn btn-sm" onclick="moveStage('${s.id}',-1)"><i class="ti ti-arrow-left"></i></button>`:''}
+        ${i<sorted.length-1?`<button class="btn btn-sm" onclick="moveStage('${s.id}',1)"><i class="ti ti-arrow-right"></i></button>`:''}
+        <button class="btn btn-sm" onclick="openEditStageAdmin('${s.id}')"><i class="ti ti-edit"></i></button>
+        ${DEALS.filter(d=>d.stage===s.id).length===0?`<button class="btn btn-sm btn-danger" onclick="deleteStage('${s.id}')"><i class="ti ti-trash"></i></button>`:''}
+      </div>
+    </div>`).join('');
+}
+async function moveStage(id, dir) {
+  const sorted = [...STAGES].sort((a,b)=>a.order-b.order);
+  const idx = sorted.findIndex(s=>s.id===id), target = sorted[idx+dir];
+  if (!target) return;
+  await api('PATCH',`/stages/${id}`,{sortOrder:target.order});
+  await api('PATCH',`/stages/${target.id}`,{sortOrder:sorted[idx].order});
+  const stages = await api('GET','/stages');
+  STAGES = stages.map(s=>({id:s.id,label:s.label,color:s.color,bg:s.bg_color,tc:s.text_color,order:s.sort_order}));
+  renderStageList(); render();
+}
+function openAddStageAdmin() { document.getElementById('modalBox').innerHTML=buildStageForm(null); document.getElementById('modalOverlay').classList.add('open'); }
+function openEditStageAdmin(id) { const s=STAGES.find(x=>x.id===id); document.getElementById('modalBox').innerHTML=buildStageForm(s); document.getElementById('modalOverlay').classList.add('open'); }
+function buildStageForm(s) {
+  const ie=!!s;
+  return `<div class="modal-head"><h2>${ie?'단계 편집':'단계 추가'}</h2><button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label>단계명 *</label><input id="sf-label" value="${s?s.label:''}" placeholder="예: 계약 검토"></div>
+      <div class="row2">
+        <div class="field"><label>색상</label><input id="sf-color" type="color" value="${s?s.color:'#6366F1'}" style="height:38px;padding:4px 6px"></div>
+        <div class="field"><label>배경색</label><input id="sf-bg" type="color" value="${s?s.bg:'#EEF2FF'}" style="height:38px;padding:4px 6px"></div>
+      </div>
+      <div class="field"><label>텍스트 색</label><input id="sf-tc" type="color" value="${s?s.tc:'#3730A3'}" style="height:38px;padding:4px 6px"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">취소</button><button class="btn btn-primary" onclick="saveStage('${s?s.id:"null"}')">${ie?'저장':'추가'}</button></div>`;
+}
+async function saveStage(sid) {
+  const label=document.getElementById('sf-label').value.trim();
+  if(!label){toast('단계명을 입력하세요','danger');return}
+  const body={label,color:document.getElementById('sf-color').value,bgColor:document.getElementById('sf-bg').value,textColor:document.getElementById('sf-tc').value};
+  try {
+    if(sid!=='null') await api('PATCH',`/stages/${sid}`,body); else await api('POST','/stages',body);
+    toast(sid!=='null'?'단계가 수정되었습니다':'단계가 추가되었습니다','success');
+    const stages=await api('GET','/stages'); STAGES=stages.map(s=>({id:s.id,label:s.label,color:s.color,bg:s.bg_color,tc:s.text_color,order:s.sort_order}));
+    closeModal(); renderStageList(); render();
+  } catch(e){toast(e.message,'danger');}
+}
+async function deleteStage(id) {
+  if(!confirm('단계를 삭제하시겠습니까?'))return;
+  try { await api('DELETE',`/stages/${id}`); const stages=await api('GET','/stages'); STAGES=stages.map(s=>({id:s.id,label:s.label,color:s.color,bg:s.bg_color,tc:s.text_color,order:s.sort_order})); toast('삭제되었습니다'); renderStageList(); render(); }
+  catch(e){toast(e.message,'danger');}
+}
+
+// PERMS (로컬 표시용 — 실제 권한은 서버에서 적용)
+const PERM_LABELS={addDeal:'거래처 추가',editDeal:'거래처 편집',deleteDeal:'거래처 삭제',changeStage:'단계 변경',changeDeadline:'마감일 변경',viewAll:'전체 보기',manageUsers:'사용자 관리',manageStages:'단계 관리'};
+const SERVER_PERMS={
+  admin:    {addDeal:true,editDeal:true,deleteDeal:true,changeStage:true,changeDeadline:true,viewAll:true,manageUsers:true,manageStages:true},
+  manager:  {addDeal:true,editDeal:true,deleteDeal:true,changeStage:true,changeDeadline:true,viewAll:true,manageUsers:false,manageStages:false},
+  hospital: {addDeal:true,editDeal:false,deleteDeal:false,changeStage:false,changeDeadline:false,viewAll:false,manageUsers:false,manageStages:false},
+  member:   {addDeal:true,editDeal:true,deleteDeal:false,changeStage:true,changeDeadline:true,viewAll:false,manageUsers:false,manageStages:false},
+};
+function renderPermTable() {
+  const roles=['admin','manager','hospital','member'];
+  const perms=Object.keys(PERM_LABELS);
+  document.getElementById('permTable').innerHTML=`
+    <tr><th>권한</th>${roles.map(r=>`<th><span class="role-badge ${roleCls(r)}">${roleLabel(r)}</span></th>`).join('')}</tr>
+    ${perms.map(p=>`<tr><td>${PERM_LABELS[p]}</td>${roles.map(r=>`<td style="text-align:center"><i class="ti ti-${SERVER_PERMS[r][p]?'check" style="color:var(--green)':'x" style="color:var(--red)'}" style="font-size:16px"></i></td>`).join('')}</tr>`).join('')}`;
+}
+function setAdminSection(sec){
+  document.querySelectorAll('.admin-nav-item').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(el=>el.classList.remove('active'));
+  document.getElementById('anav-'+sec).classList.add('active');
+  document.getElementById('asec-'+sec).classList.add('active');
+}
+
+// GROUP CRUD
+function openAddGroup(){document.getElementById('modalBox').innerHTML=buildGroupForm(null);document.getElementById('modalOverlay').classList.add('open');}
+function openEditGroup(id){const g=GROUPS.find(x=>x.id===id);document.getElementById('modalBox').innerHTML=buildGroupForm(g);document.getElementById('modalOverlay').classList.add('open');}
+function buildGroupForm(g){
+  const ie=!!g, icons=['ti-loader','ti-rocket','ti-refresh','ti-building','ti-briefcase','ti-crown','ti-flame','ti-target','ti-diamond','ti-globe'];
+  return `<div class="modal-head"><h2>${ie?'그룹 편집':'그룹 추가'}</h2><button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label>그룹명 *</label><input id="gf-label" value="${g?g.label:''}" placeholder="예: 전략 고객"></div>
+      <div class="row2">
+        <div class="field"><label>색상</label><input id="gf-color" type="color" value="${g?g.color:'#1A56DB'}" style="height:38px;padding:4px 6px"></div>
+        <div class="field"><label>아이콘</label><select id="gf-icon">${icons.map(i=>`<option value="${i}"${g&&g.icon===i?' selected':''}>${i.replace('ti-','')}</option>`).join('')}</select></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">취소</button><button class="btn btn-primary" onclick="saveGroup('${g?g.id:"null"}')">${ie?'저장':'추가'}</button></div>`;
+}
+async function saveGroup(id){
+  const label=document.getElementById('gf-label').value.trim();
+  if(!label){toast('그룹명을 입력하세요','danger');return}
+  const body={label,color:document.getElementById('gf-color').value,icon:document.getElementById('gf-icon').value};
+  try {
+    if(id!=='null') await api('PATCH',`/groups/${id}`,body); else await api('POST','/groups',body);
+    toast('저장되었습니다','success'); closeModal();
+    const groups=await api('GET','/groups'); GROUPS=groups.map(g=>({id:g.id,label:g.label,color:g.color,icon:g.icon}));
+    render();
+  } catch(e){toast(e.message,'danger');}
+}
+async function deleteGroup(id){
+  if(!confirm('그룹을 삭제할까요?\n소속 거래처는 미분류로 이동됩니다.'))return;
+  try { await api('DELETE',`/groups/${id}`); if(activeVendorTab===id)activeVendorTab='all'; const groups=await api('GET','/groups'); GROUPS=groups.map(g=>({id:g.id,label:g.label,color:g.color,icon:g.icon})); await loadAll(); render(); }
+  catch(e){toast(e.message,'danger');}
+}
+
+// MODAL
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// BOOT
+tryAutoLogin();
+
+</script>
+</body>
+</html>
